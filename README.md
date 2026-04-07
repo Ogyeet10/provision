@@ -1,15 +1,29 @@
 # provision
 
-To install dependencies:
+## Development
+
+Install dependencies:
 
 ```bash
 bun install
 ```
 
-To run:
+Run the app:
 
 ```bash
-bun run index.ts
+bun run provision --help
 ```
 
-This project was created using `bun init` in bun v1.3.12. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Run the setup UI:
+
+```bash
+bun run provision setup
+```
+
+## Windows Install Script
+
+Install the latest released Provision binary and add it to `PATH`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-provision.ps1
+```

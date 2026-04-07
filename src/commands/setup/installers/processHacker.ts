@@ -1,6 +1,7 @@
 import { cp, mkdir, mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { expandArchive } from "../../../helpers/windows/archive.ts";
 import { createStartMenuShortcut } from "../../../helpers/windows/startMenu.ts";
 import type { InstallTask } from "../types.ts";
 import type { InstallCallbacks } from "./types.ts";
@@ -46,7 +47,7 @@ export async function installProcessHacker(task: InstallTask, callbacks: Install
     callbacks.log(`${task.name}: copying files into ${task.installPath}`);
     callbacks.update("installing", 84);
 
-    await mkdir(task.installPath, { recursive: true });
+    await rm(task.installPath, { recursive: true, force: true });
     await cp(sourceDir, task.installPath, { recursive: true, force: true });
 
     if (callbacks.isCancelled()) {
@@ -63,31 +64,11 @@ export async function installProcessHacker(task: InstallTask, callbacks: Install
       folder: "Provision",
       location: "common",
       workingDirectory: task.installPath,
+      iconPath: path.win32.join(task.installPath, PROCESS_HACKER_EXECUTABLE),
     });
 
     callbacks.update("installing", 99);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
-  }
-}
-
-async function expandArchive(zipPath: string, destinationPath: string) {
-  const command = "Expand-Archive -LiteralPath $env:PROVISION_ZIP_PATH -DestinationPath $env:PROVISION_EXTRACT_PATH -Force";
-
-  const proc = Bun.spawn(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", command], {
-    env: {
-      ...process.env,
-      PROVISION_ZIP_PATH: zipPath,
-      PROVISION_EXTRACT_PATH: destinationPath,
-    },
-    stdout: "ignore",
-    stderr: "pipe",
-  });
-
-  const exitCode = await proc.exited;
-
-  if (exitCode !== 0) {
-    const errorText = await new Response(proc.stderr).text();
-    throw new Error(errorText.trim() || "Failed to expand archive.");
   }
 }
