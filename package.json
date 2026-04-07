@@ -1,0 +1,24 @@
+{
+  "name": "provision",
+  "version": "0.1.0",
+  "bin": {
+    "provision": "./index.ts"
+  },
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "provision": "bun index.ts",
+    "build:exe": "mkdir -p dist && bun build ./index.ts --compile --target=bun-windows-x64 --outfile ./dist/provision-x64.exe"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.1.97",
+    "@opentui/core-win32-x64": "file:./vendor/opentui/core-win32-x64"
+  }
+}

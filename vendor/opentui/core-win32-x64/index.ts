@@ -1,0 +1,4 @@
+const module = await import("./opentui.dll", { with: { type: "file" } });
+const path = module.default;
+
+export default path;
