@@ -51,7 +51,7 @@ Write-Step "Creating install directory at $BinDirectory"
 New-Item -ItemType Directory -Path $BinDirectory -Force | Out-Null
 
 Write-Step "Downloading Provision $ReleaseVersion"
-Invoke-WebRequest -Uri $DownloadUrl -OutFile $ExecutablePath
+Start-BitsTransfer -Source $DownloadUrl -Destination $ExecutablePath
 
 Write-Step "Adding $BinDirectory to PATH"
 $pathScope = Add-DirectoryToPath -Directory $BinDirectory
