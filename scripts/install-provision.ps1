@@ -15,12 +15,10 @@ function Write-Step {
 function Add-DirectoryToPath {
   param([string] $Directory)
 
-  $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-  $machineEntries = @()
-
-  if ($machinePath) {
-    $machineEntries = $machinePath.Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
-  }
+  $machineKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+  $userKey = "HKCU:\Environment"
+  $machinePath = (Get-ItemProperty -Path $machineKey -Name Path -ErrorAction SilentlyContinue).Path
+  $machineEntries = @($machinePath -split ";" | Where-Object { $_ })
 
   if ($machineEntries -contains $Directory) {
     return "Machine"
@@ -28,19 +26,16 @@ function Add-DirectoryToPath {
 
   try {
     $updatedMachinePath = @($machineEntries + $Directory) -join ";"
-    [Environment]::SetEnvironmentVariable("Path", $updatedMachinePath, "Machine")
+    Set-ItemProperty -Path $machineKey -Name Path -Value $updatedMachinePath
     return "Machine"
   } catch {
-    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-    $userEntries = @()
-
-    if ($userPath) {
-      $userEntries = $userPath.Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
-    }
+    New-Item -Path $userKey -Force | Out-Null
+    $userPath = (Get-ItemProperty -Path $userKey -Name Path -ErrorAction SilentlyContinue).Path
+    $userEntries = @($userPath -split ";" | Where-Object { $_ })
 
     if ($userEntries -notcontains $Directory) {
       $updatedUserPath = @($userEntries + $Directory) -join ";"
-      [Environment]::SetEnvironmentVariable("Path", $updatedUserPath, "User")
+      Set-ItemProperty -Path $userKey -Name Path -Value $updatedUserPath
     }
 
     return "User"
@@ -56,10 +51,10 @@ Start-BitsTransfer -Source $DownloadUrl -Destination $ExecutablePath
 Write-Step "Adding $BinDirectory to PATH"
 $pathScope = Add-DirectoryToPath -Directory $BinDirectory
 
-$sessionPath = $env:Path.Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
+$sessionPath = @($env:Path -split ";" | Where-Object { $_ })
 
 if ($sessionPath -notcontains $BinDirectory) {
-  $env:Path = ($env:Path.TrimEnd(";") + ";" + $BinDirectory).TrimStart(";")
+  $env:Path = @($sessionPath + $BinDirectory) -join ";"
 }
 
 Write-Host ""
