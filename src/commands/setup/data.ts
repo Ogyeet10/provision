@@ -16,6 +16,13 @@ export const INSTALL_OPTIONS: InstallOption[] = [
     installer: "ungoogled-chromium",
   },
   {
+    id: "translucent-tb",
+    name: "TranslucentTB",
+    description: "Portable Windows taskbar customizer.",
+    installPath: "C:\\ProgramData\\Provision\\TranslucentTB",
+    installer: "translucent-tb",
+  },
+  {
     id: "tailscale",
     name: "Tailscale",
     description: "Private mesh VPN client.",

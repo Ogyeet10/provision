@@ -6,7 +6,7 @@ export type InstallOption = {
   name: string;
   description: string;
   installPath: string;
-  installer: "demo" | "process-hacker" | "ungoogled-chromium";
+  installer: "demo" | "process-hacker" | "translucent-tb" | "ungoogled-chromium";
 };
 
 export type InstallPhase = "queued" | "downloading" | "extracting" | "installing" | "completed";

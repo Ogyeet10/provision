@@ -15,10 +15,9 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "dependencies": {
-    "@opentui/core": "^0.1.97",
-    "@opentui/core-win32-x64": "file:./vendor/opentui/core-win32-x64"
+    "@opentui/core": "^0.1.97"
   }
 }

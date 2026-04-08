@@ -1,11 +1,13 @@
 import type { InstallTask } from "../types.ts";
 import { runDemoInstall } from "./demo.ts";
 import { installProcessHacker } from "./processHacker.ts";
+import { installTranslucentTB } from "./translucentTB.ts";
 import { installUngoogledChromium } from "./ungoogledChromium.ts";
 import type { InstallCallbacks, Installer } from "./types.ts";
 
 const WINDOWS_INSTALLERS: Record<string, Installer> = {
   "process-hacker": installProcessHacker,
+  "translucent-tb": installTranslucentTB,
   "ungoogled-chromium": installUngoogledChromium,
 };
 
