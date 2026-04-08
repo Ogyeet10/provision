@@ -1,7 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$ReleaseVersion = "0.1.0"
-$DownloadUrl = "https://github.com/Ogyeet10/provision/releases/download/$ReleaseVersion/provision-x64.exe"
+$DownloadUrl = "https://github.com/Ogyeet10/provision/releases/latest/download/provision-x64.exe"
 $InstallRoot = Join-Path $env:ProgramData "Provision"
 $BinDirectory = Join-Path $InstallRoot "bin"
 $ExecutablePath = Join-Path $BinDirectory "provision.exe"
@@ -45,7 +44,7 @@ function Add-DirectoryToPath {
 Write-Step "Creating install directory at $BinDirectory"
 New-Item -ItemType Directory -Path $BinDirectory -Force | Out-Null
 
-Write-Step "Downloading Provision $ReleaseVersion"
+Write-Step "Downloading latest Provision release"
 Start-BitsTransfer -Source $DownloadUrl -Destination $ExecutablePath
 
 Write-Step "Adding $BinDirectory to PATH"
