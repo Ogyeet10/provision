@@ -17,7 +17,60 @@ export type CreateStartMenuShortcutOptions = {
 export async function createStartMenuShortcut(options: CreateStartMenuShortcutOptions) {
   ensureWindows();
 
-  const location = options.location ?? "common";
+  const requestedLocation: StartMenuShortcutLocation = options.location ?? "common";
+  const locations: StartMenuShortcutLocation[] =
+    requestedLocation === "common" ? ["common", "user"] : [requestedLocation];
+  let lastError: unknown;
+
+  for (const location of locations) {
+    try {
+      return await createStartMenuShortcutAtLocation(options, location);
+    } catch (error) {
+      lastError = error;
+
+      if (location !== "common" || !isPermissionError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error(`Failed to create Start Menu shortcut for ${options.name}.`);
+}
+
+export function getStartMenuProgramsDirectory(location: StartMenuShortcutLocation = "common") {
+  ensureWindows();
+
+  if (location === "common") {
+    const programData = process.env.ProgramData;
+
+    if (!programData) {
+      throw new Error("ProgramData is not set.");
+    }
+
+    return path.win32.join(programData, "Microsoft", "Windows", "Start Menu", "Programs");
+  }
+
+  const appData = process.env.APPDATA;
+
+  if (!appData) {
+    throw new Error("APPDATA is not set.");
+  }
+
+  return path.win32.join(appData, "Microsoft", "Windows", "Start Menu", "Programs");
+}
+
+function ensureWindows() {
+  if (process.platform !== "win32") {
+    throw new Error("Start Menu shortcuts are only supported on Windows.");
+  }
+}
+
+async function createStartMenuShortcutAtLocation(
+  options: CreateStartMenuShortcutOptions,
+  location: StartMenuShortcutLocation,
+) {
   const programsDirectory = getStartMenuProgramsDirectory(location);
   const shortcutDirectory = options.folder
     ? path.win32.join(programsDirectory, options.folder)
@@ -62,30 +115,10 @@ export async function createStartMenuShortcut(options: CreateStartMenuShortcutOp
   return shortcutPath;
 }
 
-export function getStartMenuProgramsDirectory(location: StartMenuShortcutLocation = "common") {
-  ensureWindows();
-
-  if (location === "common") {
-    const programData = process.env.ProgramData;
-
-    if (!programData) {
-      throw new Error("ProgramData is not set.");
-    }
-
-    return path.win32.join(programData, "Microsoft", "Windows", "Start Menu", "Programs");
+function isPermissionError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false;
   }
 
-  const appData = process.env.APPDATA;
-
-  if (!appData) {
-    throw new Error("APPDATA is not set.");
-  }
-
-  return path.win32.join(appData, "Microsoft", "Windows", "Start Menu", "Programs");
-}
-
-function ensureWindows() {
-  if (process.platform !== "win32") {
-    throw new Error("Start Menu shortcuts are only supported on Windows.");
-  }
+  return /EPERM|EACCES|access is denied|permission/i.test(error.message);
 }
